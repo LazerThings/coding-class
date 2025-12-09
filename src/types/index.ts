@@ -1,10 +1,9 @@
 // User types
-export type UserRole = 'owner' | 'admin' | 'instructor' | 'student'
+export type UserRole = 'owner' | 'admin' | 'student'
 
 export interface User {
   id: string
   username: string
-  password: string // Stored as-is (client-side only, no real security)
   name: string
   role: UserRole
   avatar?: string

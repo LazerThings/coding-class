@@ -89,7 +89,6 @@ function handleLogout() {
                   'px-3 py-1 text-sm font-medium rounded-full',
                   currentUser?.role === 'owner' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
                   currentUser?.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                  currentUser?.role === 'instructor' ? 'bg-water-100 text-water-800 dark:bg-water-900 dark:text-water-200' :
                   'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                 ]">
                   {{ currentUser?.role }}

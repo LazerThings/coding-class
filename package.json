@@ -4,19 +4,32 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"pnpm dev:server\" \"pnpm dev:client\"",
+    "dev:client": "vite",
+    "dev:server": "tsx watch server/index.ts",
     "build": "vue-tsc -b && vite build",
+    "start": "NODE_ENV=production node --import tsx server/index.ts",
     "preview": "vite preview"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.5.0",
+    "express": "^5.2.1",
+    "express-session": "^1.18.2",
     "pinia": "^3.0.4",
     "vue": "^3.5.24",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.18.2",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
+    "concurrently": "^9.2.1",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "vite": "^7.2.4",
     "vue-tsc": "^3.1.4"

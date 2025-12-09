@@ -21,7 +21,7 @@ const showTransferModal = ref(false)
 const transferTargetId = ref('')
 
 const sortedUsers = computed(() => {
-  const roleOrder: Record<UserRole, number> = { owner: 0, admin: 1, instructor: 2, student: 3 }
+  const roleOrder: Record<UserRole, number> = { owner: 0, admin: 1, student: 2 }
   return [...allUsers.value].sort((a, b) => {
     const roleCompare = roleOrder[a.role] - roleOrder[b.role]
     if (roleCompare !== 0) return roleCompare
@@ -32,7 +32,6 @@ const sortedUsers = computed(() => {
 const roleColors: Record<UserRole, string> = {
   owner: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   admin: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-  instructor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   student: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
 }
 
@@ -99,7 +98,7 @@ function canModifyUser(user: User): boolean {
 }
 
 function getAvailableRoles(user: User): UserRole[] {
-  const roles: UserRole[] = ['student', 'instructor']
+  const roles: UserRole[] = ['student']
   // Only owner can set admin role
   if (isOwner.value && user.role !== 'owner') {
     roles.push('admin')
@@ -173,7 +172,7 @@ function canLockUser(user: User): boolean {
           <div class="card p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Instructors</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ allUsers.filter(u => u.role === 'instructor').length }}
+              {{ allUsers.filter(u => u.instructorEnabled && !u.instructorLocked).length }}
             </p>
           </div>
           <div class="card p-4">
