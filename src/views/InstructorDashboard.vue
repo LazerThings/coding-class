@@ -20,26 +20,23 @@ const myCourses = computed(() =>
 const newCourse = ref({
   title: '',
   description: '',
-  difficulty: 'beginner' as const,
   tags: ''
 })
 
-function handleCreateCourse() {
+async function handleCreateCourse() {
   if (!newCourse.value.title || !currentUser.value) return
 
-  const course = createCourse({
+  const course = await createCourse({
     title: newCourse.value.title,
     description: newCourse.value.description,
-    difficulty: newCourse.value.difficulty,
     tags: newCourse.value.tags.split(',').map(t => t.trim()).filter(Boolean),
     instructorId: currentUser.value.id,
     instructorName: currentUser.value.name,
-    lessons: [],
     isPublished: false
   })
 
   showCreateModal.value = false
-  newCourse.value = { title: '', description: '', difficulty: 'beginner', tags: '' }
+  newCourse.value = { title: '', description: '', tags: '' }
 
   router.push(`/instructor/courses/${course.id}`)
 }
@@ -48,21 +45,15 @@ function confirmDelete(course: Course) {
   courseToDelete.value = course
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (courseToDelete.value) {
-    deleteCourse(courseToDelete.value.id)
+    await deleteCourse(courseToDelete.value.id)
     courseToDelete.value = null
   }
 }
 
-function togglePublish(course: Course) {
-  updateCourse(course.id, { isPublished: !course.isPublished })
-}
-
-const difficultyColors = {
-  beginner: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  intermediate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  advanced: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+async function togglePublish(course: Course) {
+  await updateCourse(course.id, { isPublished: !course.isPublished })
 }
 </script>
 
@@ -112,9 +103,6 @@ const difficultyColors = {
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <span :class="['px-2 py-0.5 text-xs font-medium rounded', difficultyColors[course.difficulty]]">
-                  {{ course.difficulty }}
-                </span>
                 <span :class="[
                   'px-2 py-0.5 text-xs font-medium rounded',
                   course.isPublished
@@ -198,15 +186,6 @@ const difficultyColors = {
               rows="3"
               placeholder="What will students learn in this course?"
             ></textarea>
-          </div>
-
-          <div>
-            <label class="label">Difficulty Level</label>
-            <select v-model="newCourse.difficulty" class="input">
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
           </div>
 
           <div>

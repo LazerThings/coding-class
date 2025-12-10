@@ -117,7 +117,6 @@ export interface Course {
   instructorName: string
   lessons: Lesson[]
   tags: string[]
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
   isPublished: boolean
   createdAt: Date
   updatedAt: Date

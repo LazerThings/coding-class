@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useCourses } from '../composables/useCourses'
 import { useAuth } from '../composables/useAuth'
 import AppLayout from '../components/layout/AppLayout.vue'
 import type { Lesson, ContentBlock, ContentBlockType } from '../types'
 
 const route = useRoute()
-const router = useRouter()
 const {
   getCourseById,
   updateCourse,
@@ -31,12 +30,14 @@ const selectedLesson = computed(() =>
 const showLessonModal = ref(false)
 const showBlockModal = ref(false)
 const editingLesson = ref<Partial<Lesson> | null>(null)
-const editingBlock = ref<Partial<ContentBlock> | null>(null)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const editingBlock = ref<Record<string, any> | null>(null)
 
 // Auto-select first lesson
 watch(course, (c) => {
-  if (c && c.lessons.length > 0 && !selectedLessonId.value) {
-    selectedLessonId.value = c.lessons[0].id
+  const firstLesson = c?.lessons[0]
+  if (firstLesson && !selectedLessonId.value) {
+    selectedLessonId.value = firstLesson.id
   }
 }, { immediate: true })
 
@@ -44,7 +45,6 @@ watch(course, (c) => {
 const courseSettings = ref({
   title: '',
   description: '',
-  difficulty: 'beginner' as const,
   tags: '',
   thumbnail: ''
 })
@@ -54,19 +54,17 @@ watch(course, (c) => {
     courseSettings.value = {
       title: c.title,
       description: c.description,
-      difficulty: c.difficulty,
       tags: c.tags.join(', '),
       thumbnail: c.thumbnail || ''
     }
   }
 }, { immediate: true })
 
-function saveCourseSettings() {
+async function saveCourseSettings() {
   if (!course.value) return
-  updateCourse(course.value.id, {
+  await updateCourse(course.value.id, {
     title: courseSettings.value.title,
     description: courseSettings.value.description,
-    difficulty: courseSettings.value.difficulty,
     tags: courseSettings.value.tags.split(',').map(t => t.trim()).filter(Boolean),
     thumbnail: courseSettings.value.thumbnail || undefined
   })
@@ -88,13 +86,13 @@ function openLessonModal(lesson?: Lesson) {
   showLessonModal.value = true
 }
 
-function saveLesson() {
+async function saveLesson() {
   if (!editingLesson.value || !course.value) return
 
   if (editingLesson.value.id) {
-    updateLesson(course.value.id, editingLesson.value.id, editingLesson.value)
+    await updateLesson(course.value.id, editingLesson.value.id, editingLesson.value)
   } else {
-    const newLesson = addLesson(course.value.id, editingLesson.value as Omit<Lesson, 'id'>)
+    const newLesson = await addLesson(course.value.id, editingLesson.value as Omit<Lesson, 'id' | 'contentBlocks'>)
     if (newLesson) {
       selectedLessonId.value = newLesson.id
     }
@@ -104,10 +102,10 @@ function saveLesson() {
   editingLesson.value = null
 }
 
-function handleDeleteLesson(lessonId: string) {
+async function handleDeleteLesson(lessonId: string) {
   if (!course.value) return
   if (confirm('Are you sure you want to delete this lesson?')) {
-    deleteLesson(course.value.id, lessonId)
+    await deleteLesson(course.value.id, lessonId)
     if (selectedLessonId.value === lessonId) {
       selectedLessonId.value = course.value.lessons[0]?.id ?? null
     }
@@ -178,18 +176,18 @@ function openBlockModal(type: ContentBlockType, block?: ContentBlock) {
   showBlockModal.value = true
 }
 
-function saveBlock() {
+async function saveBlock() {
   if (!editingBlock.value || !course.value || !selectedLessonId.value) return
 
   if (editingBlock.value.id) {
-    updateContentBlock(
+    await updateContentBlock(
       course.value.id,
       selectedLessonId.value,
       editingBlock.value.id,
       editingBlock.value
     )
   } else {
-    addContentBlock(
+    await addContentBlock(
       course.value.id,
       selectedLessonId.value,
       editingBlock.value as Omit<ContentBlock, 'id'>
@@ -200,10 +198,10 @@ function saveBlock() {
   editingBlock.value = null
 }
 
-function handleDeleteBlock(blockId: string) {
+async function handleDeleteBlock(blockId: string) {
   if (!course.value || !selectedLessonId.value) return
   if (confirm('Are you sure you want to delete this content block?')) {
-    deleteContentBlock(course.value.id, selectedLessonId.value, blockId)
+    await deleteContentBlock(course.value.id, selectedLessonId.value, blockId)
   }
 }
 
@@ -280,19 +278,9 @@ function getBlockTypeLabel(type: ContentBlockType): string {
                 <textarea v-model="courseSettings.description" class="input" rows="3"></textarea>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="label">Difficulty</label>
-                  <select v-model="courseSettings.difficulty" class="input">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="label">Tags (comma separated)</label>
-                  <input v-model="courseSettings.tags" type="text" class="input" />
-                </div>
+              <div>
+                <label class="label">Tags (comma separated)</label>
+                <input v-model="courseSettings.tags" type="text" class="input" />
               </div>
 
               <div>

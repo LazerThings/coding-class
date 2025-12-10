@@ -15,7 +15,6 @@ interface DbCourse {
   thumbnail: string | null
   instructor_id: string
   instructor_name: string
-  difficulty: string
   tags: string
   is_published: number
   created_at: string
@@ -84,7 +83,6 @@ function dbCourseToCourse(row: DbCourse): Omit<Course, 'lessons'> {
     thumbnail: row.thumbnail || undefined,
     instructorId: row.instructor_id,
     instructorName: row.instructor_name,
-    difficulty: row.difficulty as Course['difficulty'],
     tags: JSON.parse(row.tags),
     isPublished: Boolean(row.is_published),
     createdAt: new Date(row.created_at),
@@ -185,7 +183,7 @@ router.post('/', requireAuth, requireInstructor, (req, res) => {
   const user = getCurrentUser(req)!
   const userInfo = db.prepare('SELECT name FROM users WHERE id = ?').get(user.id) as { name: string }
 
-  const { title, description, thumbnail, difficulty, tags, isPublished } = req.body
+  const { title, description, thumbnail, tags, isPublished } = req.body
 
   if (!title || !description) {
     res.status(400).json({ error: 'Title and description are required' })
@@ -196,8 +194,8 @@ router.post('/', requireAuth, requireInstructor, (req, res) => {
   const now = new Date().toISOString()
 
   db.prepare(`
-    INSERT INTO courses (id, title, description, thumbnail, instructor_id, instructor_name, difficulty, tags, is_published, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO courses (id, title, description, thumbnail, instructor_id, instructor_name, tags, is_published, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     title,
@@ -205,7 +203,6 @@ router.post('/', requireAuth, requireInstructor, (req, res) => {
     thumbnail || null,
     user.id,
     userInfo.name,
-    difficulty || 'beginner',
     JSON.stringify(tags || []),
     isPublished ? 1 : 0,
     now,
@@ -232,14 +229,13 @@ router.patch('/:id', requireAuth, requireInstructor, (req, res) => {
     return
   }
 
-  const { title, description, thumbnail, difficulty, tags, isPublished } = req.body
+  const { title, description, thumbnail, tags, isPublished } = req.body
   const updates: string[] = []
   const values: (string | number | null)[] = []
 
   if (title !== undefined) { updates.push('title = ?'); values.push(title) }
   if (description !== undefined) { updates.push('description = ?'); values.push(description) }
   if (thumbnail !== undefined) { updates.push('thumbnail = ?'); values.push(thumbnail || null) }
-  if (difficulty !== undefined) { updates.push('difficulty = ?'); values.push(difficulty) }
   if (tags !== undefined) { updates.push('tags = ?'); values.push(JSON.stringify(tags)) }
   if (isPublished !== undefined) { updates.push('is_published = ?'); values.push(isPublished ? 1 : 0) }
 

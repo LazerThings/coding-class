@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCourses } from '../composables/useCourses'
 import { useAuth } from '../composables/useAuth'
@@ -7,37 +7,36 @@ import AppLayout from '../components/layout/AppLayout.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { getCourseById, enrollInCourse, isEnrolled, getProgress, getCourseCompletionPercent } = useCourses()
+const { getCourseById, enrollInCourse, isEnrolled, getProgress, getCourseCompletionPercentSync } = useCourses()
 const { isAuthenticated } = useAuth()
 
 const courseId = computed(() => route.params.id as string)
 const course = computed(() => getCourseById(courseId.value))
 const enrolled = computed(() => isEnrolled(courseId.value))
 const progress = computed(() => getProgress(courseId.value))
-const completionPercent = computed(() => getCourseCompletionPercent(courseId.value))
+const completionPercent = ref(0)
 
-const difficultyColors = {
-  beginner: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  intermediate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  advanced: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-}
+onMounted(async () => {
+  completionPercent.value = getCourseCompletionPercentSync(courseId.value)
+})
 
-function handleEnroll() {
+async function handleEnroll() {
   if (!isAuthenticated.value) {
     router.push('/login')
     return
   }
-  enrollInCourse(courseId.value)
-}
-
-function startCourse() {
-  if (course.value && course.value.lessons.length > 0) {
-    router.push(`/courses/${courseId.value}/lessons/${course.value.lessons[0].id}`)
-  }
+  await enrollInCourse(courseId.value)
 }
 
 function continueCourse() {
-  if (!course.value || !progress.value) return
+  if (!course.value || !progress.value) {
+    // Not enrolled yet or no progress, start from beginning
+    const firstLesson = course.value?.lessons[0]
+    if (firstLesson) {
+      router.push(`/courses/${courseId.value}/lessons/${firstLesson.id}`)
+    }
+    return
+  }
 
   // Find the first incomplete lesson
   for (const lesson of course.value.lessons) {
@@ -49,8 +48,9 @@ function continueCourse() {
   }
 
   // All lessons completed, go to first lesson
-  if (course.value.lessons.length > 0) {
-    router.push(`/courses/${courseId.value}/lessons/${course.value.lessons[0].id}`)
+  const firstLesson = course.value.lessons[0]
+  if (firstLesson) {
+    router.push(`/courses/${courseId.value}/lessons/${firstLesson.id}`)
   }
 }
 
@@ -84,9 +84,6 @@ function getLessonProgress(lessonId: string): number {
             <!-- Course Info -->
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-4">
-                <span :class="['px-3 py-1 text-sm font-medium rounded-full', difficultyColors[course.difficulty]]">
-                  {{ course.difficulty }}
-                </span>
                 <span v-for="tag in course.tags" :key="tag" class="px-3 py-1 text-sm bg-white/20 rounded-full">
                   {{ tag }}
                 </span>

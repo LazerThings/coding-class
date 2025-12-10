@@ -13,18 +13,18 @@ const saveMessage = ref('')
 const isLocked = computed(() => currentUser.value?.instructorLocked ?? false)
 const instructorEnabled = computed(() => currentUser.value?.instructorEnabled ?? false)
 
-function handleInstructorToggle(event: Event) {
+async function handleInstructorToggle(event: Event) {
   const target = event.target as HTMLInputElement
-  const result = toggleInstructorEnabled(target.checked)
+  const result = await toggleInstructorEnabled(target.checked)
   if (!result.success) {
     // Revert the checkbox
     target.checked = !target.checked
   }
 }
 
-function saveName() {
+async function saveName() {
   if (name.value.trim()) {
-    updateProfile({ name: name.value.trim() })
+    await updateProfile({ name: name.value.trim() })
     saveMessage.value = 'Name saved!'
     setTimeout(() => {
       saveMessage.value = ''

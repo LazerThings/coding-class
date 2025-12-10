@@ -35,11 +35,11 @@ const roleColors: Record<UserRole, string> = {
   student: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
 }
 
-function handleRoleChange(user: User, newRole: UserRole) {
+async function handleRoleChange(user: User, newRole: UserRole) {
   error.value = ''
   success.value = ''
 
-  const result = updateUserRole(user.id, newRole)
+  const result = await updateUserRole(user.id, newRole)
   if (result.success) {
     success.value = `${user.name}'s role updated to ${newRole}`
     setTimeout(() => success.value = '', 3000)
@@ -48,7 +48,7 @@ function handleRoleChange(user: User, newRole: UserRole) {
   }
 }
 
-function handleDelete(user: User) {
+async function handleDelete(user: User) {
   if (!confirm(`Are you sure you want to delete ${user.name}? This cannot be undone.`)) {
     return
   }
@@ -56,7 +56,7 @@ function handleDelete(user: User) {
   error.value = ''
   success.value = ''
 
-  const result = deleteUser(user.id)
+  const result = await deleteUser(user.id)
   if (result.success) {
     success.value = `${user.name} has been deleted`
     setTimeout(() => success.value = '', 3000)
@@ -70,12 +70,12 @@ function openTransferModal(userId: string) {
   showTransferModal.value = true
 }
 
-function confirmTransfer() {
+async function confirmTransfer() {
   error.value = ''
   success.value = ''
 
   const targetUser = allUsers.value.find(u => u.id === transferTargetId.value)
-  const result = transferOwnership(transferTargetId.value)
+  const result = await transferOwnership(transferTargetId.value)
 
   showTransferModal.value = false
   transferTargetId.value = ''
@@ -106,11 +106,11 @@ function getAvailableRoles(user: User): UserRole[] {
   return roles
 }
 
-function handleInstructorLock(user: User, locked: boolean) {
+async function handleInstructorLock(user: User, locked: boolean) {
   error.value = ''
   success.value = ''
 
-  const result = setInstructorLock(user.id, locked)
+  const result = await setInstructorLock(user.id, locked)
   if (result.success) {
     success.value = locked
       ? `${user.name} is now locked from becoming an instructor`

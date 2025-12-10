@@ -17,7 +17,7 @@ const isSubmitting = ref(false)
 
 const isFirstUser = computed(() => allUsers.value.length === 0)
 
-function handleLogin() {
+async function handleLogin() {
   error.value = ''
 
   if (!username.value) {
@@ -31,7 +31,7 @@ function handleLogin() {
   }
 
   isSubmitting.value = true
-  const result = login(username.value, password.value)
+  const result = await login(username.value, password.value)
   isSubmitting.value = false
 
   if (result.success) {
@@ -41,7 +41,7 @@ function handleLogin() {
   }
 }
 
-function handleSignup() {
+async function handleSignup() {
   error.value = ''
 
   if (!username.value) {
@@ -75,7 +75,7 @@ function handleSignup() {
   }
 
   isSubmitting.value = true
-  const result = signup(username.value, password.value, name.value)
+  const result = await signup(username.value, password.value, name.value)
   isSubmitting.value = false
 
   if (result.success) {

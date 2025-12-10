@@ -3,10 +3,9 @@ import { ref, computed } from 'vue'
 import { useCourses } from '../composables/useCourses'
 import AppLayout from '../components/layout/AppLayout.vue'
 
-const { publishedCourses, getCourseCompletionPercent, isEnrolled } = useCourses()
+const { publishedCourses, getCourseCompletionPercentSync, isEnrolled } = useCourses()
 
 const searchQuery = ref('')
-const selectedDifficulty = ref<string>('')
 const selectedTag = ref<string>('')
 
 const allTags = computed(() => {
@@ -23,25 +22,15 @@ const filteredCourses = computed(() => {
       course.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       course.description.toLowerCase().includes(searchQuery.value.toLowerCase())
 
-    const matchesDifficulty = !selectedDifficulty.value ||
-      course.difficulty === selectedDifficulty.value
-
     const matchesTag = !selectedTag.value ||
       course.tags.includes(selectedTag.value)
 
-    return matchesSearch && matchesDifficulty && matchesTag
+    return matchesSearch && matchesTag
   })
 })
 
-const difficultyColors = {
-  beginner: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  intermediate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  advanced: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-}
-
 function clearFilters() {
   searchQuery.value = ''
-  selectedDifficulty.value = ''
   selectedTag.value = ''
 }
 </script>
@@ -69,18 +58,12 @@ function clearFilters() {
             />
           </div>
           <div class="flex gap-4">
-            <select v-model="selectedDifficulty" class="input w-auto">
-              <option value="">All Levels</option>
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
             <select v-model="selectedTag" class="input w-auto">
               <option value="">All Tags</option>
               <option v-for="tag in allTags" :key="tag" :value="tag">{{ tag }}</option>
             </select>
             <button
-              v-if="searchQuery || selectedDifficulty || selectedTag"
+              v-if="searchQuery || selectedTag"
               @click="clearFilters"
               class="btn btn-secondary"
             >
@@ -114,12 +97,12 @@ function clearFilters() {
             >
               <div class="flex items-center justify-between text-white text-sm">
                 <span>Progress</span>
-                <span>{{ getCourseCompletionPercent(course.id) }}%</span>
+                <span>{{ getCourseCompletionPercentSync(course.id) }}%</span>
               </div>
               <div class="w-full bg-white/30 rounded-full h-1.5 mt-1">
                 <div
                   class="bg-green-400 h-1.5 rounded-full transition-all"
-                  :style="{ width: `${getCourseCompletionPercent(course.id)}%` }"
+                  :style="{ width: `${getCourseCompletionPercentSync(course.id)}%` }"
                 ></div>
               </div>
             </div>
@@ -127,9 +110,6 @@ function clearFilters() {
 
           <div class="p-4">
             <div class="flex items-center gap-2 mb-2">
-              <span :class="['px-2 py-0.5 text-xs font-medium rounded', difficultyColors[course.difficulty]]">
-                {{ course.difficulty }}
-              </span>
               <span class="text-xs text-gray-500 dark:text-gray-400">
                 {{ course.lessons.length }} lessons
               </span>

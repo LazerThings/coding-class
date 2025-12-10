@@ -4,7 +4,7 @@ import { useCourses } from '../composables/useCourses'
 import { useAuth } from '../composables/useAuth'
 import AppLayout from '../components/layout/AppLayout.vue'
 
-const { courses, enrollments, getCourseCompletionPercent, getProgress } = useCourses()
+const { courses, enrollments, getCourseCompletionPercentSync, getProgress } = useCourses()
 const { isAuthenticated } = useAuth()
 
 const enrolledCourses = computed(() => {
@@ -14,24 +14,18 @@ const enrolledCourses = computed(() => {
 
 const inProgressCourses = computed(() =>
   enrolledCourses.value.filter(c => {
-    const percent = getCourseCompletionPercent(c.id)
+    const percent = getCourseCompletionPercentSync(c.id)
     return percent > 0 && percent < 100
   })
 )
 
 const completedCourses = computed(() =>
-  enrolledCourses.value.filter(c => getCourseCompletionPercent(c.id) === 100)
+  enrolledCourses.value.filter(c => getCourseCompletionPercentSync(c.id) === 100)
 )
 
 const notStartedCourses = computed(() =>
-  enrolledCourses.value.filter(c => getCourseCompletionPercent(c.id) === 0)
+  enrolledCourses.value.filter(c => getCourseCompletionPercentSync(c.id) === 0)
 )
-
-const difficultyColors = {
-  beginner: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  intermediate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  advanced: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-}
 
 function getNextLesson(courseId: string) {
   const course = courses.value.find(c => c.id === courseId)
@@ -97,20 +91,17 @@ function getNextLesson(courseId: string) {
                   <span v-else class="text-2xl text-white/50">&lt;/&gt;</span>
                 </div>
                 <div class="p-4 flex-1">
-                  <span :class="['px-2 py-0.5 text-xs font-medium rounded', difficultyColors[course.difficulty]]">
-                    {{ course.difficulty }}
-                  </span>
-                  <h3 class="font-semibold text-gray-900 dark:text-white mt-1">{{ course.title }}</h3>
+                  <h3 class="font-semibold text-gray-900 dark:text-white">{{ course.title }}</h3>
 
                   <div class="mt-2">
                     <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
                       <span>Progress</span>
-                      <span>{{ getCourseCompletionPercent(course.id) }}%</span>
+                      <span>{{ getCourseCompletionPercentSync(course.id) }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
                         class="bg-water-600 h-2 rounded-full transition-all"
-                        :style="{ width: `${getCourseCompletionPercent(course.id)}%` }"
+                        :style="{ width: `${getCourseCompletionPercentSync(course.id)}%` }"
                       ></div>
                     </div>
                   </div>
@@ -147,10 +138,7 @@ function getNextLesson(courseId: string) {
                 <span v-else class="text-3xl text-white/50">&lt;/&gt;</span>
               </div>
               <div class="p-4">
-                <span :class="['px-2 py-0.5 text-xs font-medium rounded', difficultyColors[course.difficulty]]">
-                  {{ course.difficulty }}
-                </span>
-                <h3 class="font-semibold text-gray-900 dark:text-white mt-1">{{ course.title }}</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ course.title }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {{ course.lessons.length }} lessons
                 </p>
@@ -187,10 +175,7 @@ function getNextLesson(courseId: string) {
                 <span v-else class="text-3xl text-white/50">&lt;/&gt;</span>
               </div>
               <div class="p-4">
-                <span :class="['px-2 py-0.5 text-xs font-medium rounded', difficultyColors[course.difficulty]]">
-                  {{ course.difficulty }}
-                </span>
-                <h3 class="font-semibold text-gray-900 dark:text-white mt-1">{{ course.title }}</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ course.title }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {{ course.lessons.length }} lessons
                 </p>

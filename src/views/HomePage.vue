@@ -5,15 +5,9 @@ import { useAuth } from '../composables/useAuth'
 import AppLayout from '../components/layout/AppLayout.vue'
 
 const { publishedCourses } = useCourses()
-const { isAuthenticated, currentUser } = useAuth()
+const { isAuthenticated } = useAuth()
 
 const featuredCourses = computed(() => publishedCourses.value.slice(0, 3))
-
-const difficultyColors = {
-  beginner: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  intermediate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  advanced: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-}
 </script>
 
 <template>
@@ -117,9 +111,6 @@ const difficultyColors = {
             </div>
             <div class="p-4">
               <div class="flex items-center gap-2 mb-2">
-                <span :class="['px-2 py-0.5 text-xs font-medium rounded', difficultyColors[course.difficulty]]">
-                  {{ course.difficulty }}
-                </span>
                 <span class="text-xs text-gray-500 dark:text-gray-400">
                   {{ course.lessons.length }} lessons
                 </span>
