@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '../composables/useAuth'
 import AppLayout from '../components/layout/AppLayout.vue'
 import type { User, UserRole } from '../types'
