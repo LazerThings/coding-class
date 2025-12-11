@@ -15,6 +15,10 @@ const {
   setInstructorLock
 } = useAuth()
 
+onMounted(() => {
+  loadAllUsers()
+})
+
 const error = ref('')
 const success = ref('')
 const showTransferModal = ref(false)
