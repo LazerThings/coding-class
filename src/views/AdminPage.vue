@@ -12,7 +12,8 @@ const {
   updateUserRole,
   transferOwnership,
   deleteUser,
-  setInstructorLock
+  setInstructorLock,
+  loadAllUsers
 } = useAuth()
 
 onMounted(() => {
