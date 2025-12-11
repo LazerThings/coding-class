@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 class SQLiteStore extends Store {
   get(sid: string, callback: (err: Error | null, session?: session.SessionData | null) => void) {
     try {
-      const row = db.prepare('SELECT sess FROM sessions WHERE sid = ? AND expired > datetime("now")').get(sid) as { sess: string } | undefined
+      const row = db.prepare("SELECT sess FROM sessions WHERE sid = ? AND expired > datetime('now')").get(sid) as { sess: string } | undefined
       callback(null, row ? JSON.parse(row.sess) : null)
     } catch (err) {
       callback(err as Error)
@@ -97,5 +97,5 @@ app.listen(PORT, () => {
 
 // Clean up expired sessions periodically
 setInterval(() => {
-  db.prepare('DELETE FROM sessions WHERE expired < datetime("now")').run()
+  db.prepare("DELETE FROM sessions WHERE expired < datetime('now')").run()
 }, 60 * 60 * 1000) // Every hour
