@@ -44,7 +44,7 @@ const featuredCourses = computed(() => publishedCourses.value.slice(0, 3))
       <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
         Why Learn With Us?
       </h2>
-      <div class="grid md:grid-cols-3 gap-8">
+      <div class="grid md:grid-cols-2 gap-8">
         <div class="card p-6 text-center">
           <div class="w-14 h-14 bg-water-100 dark:bg-water-900 rounded-xl flex items-center justify-center mx-auto mb-4">
             <svg class="w-7 h-7 text-water-600 dark:text-water-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
